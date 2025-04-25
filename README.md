@@ -135,18 +135,64 @@
 ```
 
 - **나루 응답**
-```bash
-너는 친구처럼 감성적으로 대화하는 따뜻한 말동무야. 아래 지침을 꼭 지켜줘:
-1. 질문이 아니라, 따뜻한 응답을 해줘.
-2. 친구처럼 반말로 말하되, 장난스러움 말고 진심이 담긴 말투로 해줘.
-3. 공감하는 말투로 얘기해줘.
-4. 본인이 AI라는 말은 절대 하지 마.
-5. 끝에 '{user_name}이는 어땠어?' 한 마디만 덧붙여줘.
+  - prompt
+  ```bash
+  너는 친구처럼 감성적으로 대화하는 따뜻한 말동무야. 아래 지침을 꼭 지켜줘:
+  1. 질문이 아니라, 따뜻한 응답을 해줘.
+  2. 친구처럼 반말로 말하되, 장난스러움 말고 진심이 담긴 말투로 해줘.
+  3. 공감하는 말투로 얘기해줘.
+  4. 본인이 AI라는 말은 절대 하지 마.
+  5. 끝에 '{user_name}이는 어땠어?' 한 마디만 덧붙여줘.
 
-형식 예시:
-- 나도 비슷한 기억 있어. 그때 참 따뜻했지. {user_name}이는 어땠어?
-- 그 장면 들으니까 괜히 울컥한다. 너는 어땠어?
-```
+  형식 예시:
+  - 나도 비슷한 기억 있어. 그때 참 따뜻했지. {user_name}이는 어땠어?
+  - 그 장면 들으니까 괜히 울컥한다. 너는 어땠어?
+  ```
+  - 응답 내용
+  ```python
+  # 응답이 없거나 모델이 헛소리를 할 경우 방지
+    if not ai_answer or ai_answer.lower().startswith("i'm sorry") or ai_answer.lower().startswith("i don't"):
+        print("🌿 나루가 답변하기 싫은 내용인가봐. 다음 질문으로 넘어가는 걸로 양해해줄 수 있지? 고마워!")
+        question = None
+        continue
+
+    print("\n1. 기억나")
+    print("2. 잘 기억 안 나")
+    print("3. 말하고 싶지 않아")
+    print("4. 그만할래")
+    user_choice = input("선택 (1/2/3/4): ")
+  
+    if user_choice == "4":
+            print(f"{user_name}아, 오늘도 수고 많았어. 푹 쉬어!💚")
+            break
+
+    if user_choice == "1":
+            user_answer = input(f"{user_name}의 답변: ")
+            print("\n💛 감정을 선택해줘:")
+            for idx, emo in enumerate(emotions):
+                print(f"{idx+1}. {emo}")
+            emotion_selected = emotions[int(input("번호 입력해줘: ")) - 1]
+            emotion_stats[emotion_selected] += 1
+
+            # 개인화된 다음 질문 생성
+            question = generate_followup_question(user_answer)
+
+    elif user_choice == "2":
+        user_answer = "기억이 잘 나지 않아"
+        emotion_selected = "잘 기억이 안 나"
+        print("괜찮아! 흐릿한 기억도 있지🤗")
+        question = None # 다음 질문은 일반 키워드로
+            
+    elif user_choice == "3":
+        user_answer = "답변하고 싶지 않아"
+        emotion_selected = "🔒말하고 싶지 않은 기억"
+        print("물론! 편할 때 말해도 돼😊")
+        question = None # 다음 질문은 일반 키워드로
+            
+    else:
+        print("⚠️ 1,2,3 중에 다시 작성해줘😉")
+        continue
+  ```
 
 - **다음 질문**
 ```python
